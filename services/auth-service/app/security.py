@@ -1,3 +1,5 @@
+import os
+
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -10,8 +12,8 @@ from passlib.context import CryptContext
 # CONFIG
 # ======================
 
-SECRET_KEY = "super-secret-key-change-this"
-ALGORITHM = "HS256"
+SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-key")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

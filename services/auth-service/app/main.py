@@ -8,7 +8,8 @@ app = FastAPI(title="Auth Service")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
+        "http://localhost:3000",  # tu frontend principal
+        "http://localhost:8002",  # Swagger UI / otro frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
