@@ -26,6 +26,24 @@ services:
     volumes:
       - postgres_attendance_data:/var/lib/postgresql/data
 
+  postgres-tracking:
+    image: postgres:16-alpine
+    container_name: postgres-tracking
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tracking_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_tracking_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
   # =========================
   # MICROSERVICES (STATELESS)
   # =========================
@@ -53,6 +71,19 @@ services:
     ports:
       - "3002:3002"
 
+  tracking-service:
+    build:
+      context: ../apps/tracking-service
+      dockerfile: ../../infra/docker/tracking-service.Dockerfile
+    container_name: tracking-service
+    env_file:
+      - ../apps/tracking-service/.env
+    depends_on:
+      - postgres-tracking
+      - redis
+    ports:
+      - "3003:3003"
+
   api-gateway:
     build:
       context: ../apps/api-gateway
@@ -63,9 +94,11 @@ services:
     depends_on:
       - auth-service
       - attendance-service
+      - tracking-service
     ports:
       - "3001:3001"
 
 volumes:
   postgres_auth_data:
   postgres_attendance_data:
+  postgres_tracking_data:
