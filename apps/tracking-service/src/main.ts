@@ -2,9 +2,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { startKafkaConsumer } from './kafka/kafka.consumer';
-import { TrackingService } from './tracking/tracking.service';
-import { initRabbitProducer } from './rabbit/rabbit.producer';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,14 +25,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  // ✅ Inicializa Rabbit Producer
-  await initRabbitProducer();
-
-  // ✅ Arranca Kafka Consumer
-  const trackingService = app.get(TrackingService);
-  startKafkaConsumer(trackingService);
-
   await app.listen(process.env.PORT || 3003);
 }
-
 bootstrap();

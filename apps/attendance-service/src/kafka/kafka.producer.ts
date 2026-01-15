@@ -1,5 +1,6 @@
 import { Kafka, Producer } from 'kafkajs';
 
+
 let producer: Producer;
 
 export async function initKafkaProducer() {
