@@ -5,7 +5,7 @@ import { enqueueNotification } from '../rabbit/rabbit.producer';
 export async function startKafkaConsumer(trackingService: TrackingService) {
   const kafka = new Kafka({
     clientId: 'tracking-service',
-    brokers: (process.env.KAFKA_BROKERS ?? 'kafka:9092').split(','),
+    brokers: (process.env.KAFKA_BROKERS ?? 'kafka:29092').split(','),
     retry: {
       retries: 10,
     },
