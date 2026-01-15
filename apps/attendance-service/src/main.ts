@@ -2,9 +2,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { initKafkaProducer } from './kafka/kafka.producer';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // ✅ Connect Kafka Producer at startup
+  await initKafkaProducer();
 
   app.enableCors({
     origin: true,
