@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { Attendance } from './attendance.entity';
 import { CheckInDto } from './dto/checkin.dto';
 import { CheckOutDto } from './dto/checkout.dto';
-import { publishChildEvent } from '../kafka/kafka.producer';
 
 @Injectable()
 export class AttendanceService {
@@ -20,16 +19,7 @@ export class AttendanceService {
       checkInAt: new Date(),
     });
 
-    const savedRecord = await this.repo.save(record);
-
-    // ✅ Kafka event
-    await publishChildEvent({
-      type: 'ChildCheckedIn',
-      childId: dto.childId,
-      occurredAt: new Date().toISOString(),
-    });
-
-    return savedRecord;
+    return this.repo.save(record);
   }
 
   async checkOut(id: string, dto: CheckOutDto) {
@@ -39,15 +29,6 @@ export class AttendanceService {
     record.checkedOutBy = dto.checkedOutBy;
     record.checkOutAt = new Date();
 
-    const savedRecord = await this.repo.save(record);
-
-    // ✅ Kafka event
-    await publishChildEvent({
-      type: 'ChildCheckedOut',
-      childId: record.childId,
-      occurredAt: new Date().toISOString(),
-    });
-
-    return savedRecord;
+    return this.repo.save(record);
   }
 }
