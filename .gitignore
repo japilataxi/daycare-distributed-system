@@ -1,0 +1,13 @@
+# Node
+node_modules/
+
+# Python leftovers
+**/app/
+**/requirements.txt
+
+# Build
+dist/
+build/
+
+# Temporary / experiments
+notifications-service/
