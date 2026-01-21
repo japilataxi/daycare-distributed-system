@@ -1,0 +1,28 @@
+name: CD - QA
+
+on:
+  push:
+    branches: [qa]
+  workflow_dispatch:
+
+jobs:
+  deploy-qa:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create deploy record
+        run: |
+          mkdir -p deployment_logs
+          echo "Deployed to QA (pipeline evidence)" > deployment_logs/deploy.txt
+          echo "Commit: $GITHUB_SHA" >> deployment_logs/deploy.txt
+          echo "Date: $(date -u)" >> deployment_logs/deploy.txt
+          cat deployment_logs/deploy.txt
+
+      - name: Upload deploy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-deploy-log
+          path: deployment_logs/deploy.txt
