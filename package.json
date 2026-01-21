@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "ci:local": "npm run lint && npm run test && npm run build",
     "lint": "echo \"TODO: add lint\"",
     "test": "echo \"TODO: add tests\"",
     "build": "echo \"TODO: add build\""
