@@ -1,0 +1,15 @@
+name: CD - Local QA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show CD instructions
+        run: |
+          echo "CD approved"
+          echo "Run locally:"
+          echo "npm run cd:local"
