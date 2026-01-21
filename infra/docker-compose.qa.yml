@@ -38,6 +38,44 @@ services:
     volumes:
       - postgres_tracking_data:/var/lib/postgresql/data
 
+  postgres-children:
+    image: postgres:16-alpine
+    container_name: postgres-children
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: children_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_children_data:/var/lib/postgresql/data
+    
+  postgres-tutors:
+    image: postgres:16-alpine
+    container_name: postgres-tutors
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tutors_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_tutors_data:/var/lib/postgresql/data
+
+  postgres-staff:
+    image: postgres:16-alpine
+    container_name: postgres-staff
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: staff_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_staff_data:/var/lib/postgresql/data
+
+
+
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -47,6 +85,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -54,7 +94,14 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
       timeout: 5s
-      retries: 20    
+      retries: 20
+  
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb
+    ports:
+      - "8000:8000"
+  
 
   # =========================
   # KAFKA / ZOOKEEPER
@@ -66,6 +113,19 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+  
+  postgres-files:
+    image: postgres:16-alpine
+    container_name: postgres-files
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: files_db
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_files_data:/var/lib/postgresql/data
+
 
   kafka:
     image: confluentinc/cp-kafka:7.5.3
@@ -82,6 +142,39 @@ services:
     depends_on:
       - zookeeper
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb --ignore-existing local/daycare-files &&
+      mc anonymous set public local/daycare-files &&
+      echo 'Bucket ready';
+      "
+
+    
 
 
   # =========================
@@ -123,35 +216,89 @@ services:
       - postgres-tracking
       - redis
       - kafka
+      - dynamodb
     ports:
       - "3003:3003"
 
-  api-gateway:
-    build:
-      context: ../apps/api-gateway
-      dockerfile: ../../infra/docker/api-gateway.Dockerfile
-    container_name: api-gateway
-    env_file:
-      - ../apps/api-gateway/.env
-    depends_on:
-      - auth-service
-      - attendance-service
-      - tracking-service
-    ports:
-      - "3001:3001"
 
   notifications-service:
     build:
       context: ../apps/notifications-service
       dockerfile: ../../infra/docker/notifications-service.Dockerfile
     container_name: notifications-service
+    env_file:
+      - ../apps/notifications-service/.env
+    restart: unless-stopped
     depends_on:
       rabbitmq:
         condition: service_healthy
     ports:
       - "3004:3004"
 
+  children-service:
+    build:
+      context: ../apps/children-service
+      dockerfile: ../../infra/docker/children-service.Dockerfile
+    container_name: children-service
+    env_file:
+      - ../apps/children-service/.env
+    depends_on:
+      - postgres-children
+    ports:
+      - "3005:3005"
+    
+  tutors-service:
+    build:
+      context: ../apps/tutors-service
+      dockerfile: ../../infra/docker/tutors-service.Dockerfile
+    container_name: tutors-service
+    env_file:
+      - ../apps/tutors-service/.env
+    depends_on:
+      - postgres-tutors
+    ports:
+      - "3006:3006"
+
+  staff-service:
+    build:
+      context: ../apps/staff-service
+      dockerfile: ../../infra/docker/staff-service.Dockerfile
+    container_name: staff-service
+    env_file:
+      - ../apps/staff-service/.env
+    depends_on:
+      - postgres-staff
+    ports:
+      - "3007:3007"
+
+  files-service:
+    build:
+      context: ../apps/files-service
+      dockerfile: ../../infra/docker/files-service.Dockerfile
+    container_name: files-service
+    env_file:
+      - ../apps/files-service/.env
+    depends_on:
+      - postgres-files
+      - minio
+    ports:
+      - "3008:3008"
+
+
+
+ # =========================
+  # VOLUMES
+  # ========================= 
+
 volumes:
   postgres_auth_data:
   postgres_attendance_data:
   postgres_tracking_data:
+  postgres_children_data:
+  rabbitmq_data:
+  postgres_tutors_data:
+  postgres_staff_data:
+  postgres_files_data:
+  minio_data:
+
+
