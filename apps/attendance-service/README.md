@@ -57,6 +57,7 @@ From the repository root:
 ```bash
 docker compose -f docker-compose.qa.yml up -d
 
+````````Functional Testing (documentado con Swagger + curl)
 
 Invoke-RestMethod `
   -Uri "http://localhost:3002/attendance/check-in" `
@@ -77,5 +78,5 @@ Invoke-RestMethod `
   } | ConvertTo-Json)
 
 
-PS C:\Users\USUARIO\Desktop\daycare-distributed-system> k6 run apps/attendance-service/test/load/a
-ttendance-checkin.k6.js 
+------------------ k6 
+PS C:\Users\USUARIO\Desktop\daycare-distributed-system> k6 run apps/attendance-service/test/load/attendance-checkin.k6.js 

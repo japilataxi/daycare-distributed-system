@@ -13,6 +13,7 @@ async function connectWithRetry(maxRetries = 20): Promise<{ connection: Connecti
   for (let i = 1; i <= maxRetries; i++) {
     try {
       const connection = await amqp.connect(RABBIT_URL);
+
       connection.on('error', (err) => {
         console.error('[Notifications] RabbitMQ connection error:', err);
       });
@@ -24,7 +25,7 @@ async function connectWithRetry(maxRetries = 20): Promise<{ connection: Connecti
       return { connection, channel };
     } catch (err) {
       lastErr = err;
-      const wait = Math.min(2000 * i, 15000); // backoff hasta 15s
+      const wait = Math.min(2000 * i, 15000);
       console.warn(`[Notifications] RabbitMQ not ready (try ${i}/${maxRetries}). Retrying in ${wait}ms...`);
       await sleep(wait);
     }
@@ -33,7 +34,8 @@ async function connectWithRetry(maxRetries = 20): Promise<{ connection: Connecti
   throw lastErr;
 }
 
-export async function startRabbitConsumer() {
+// ✅ CAMBIO: recibe callback
+export async function startRabbitConsumer(onMessage: (payload: any) => void) {
   const { channel } = await connectWithRetry(25);
 
   await channel.assertQueue(QUEUE, { durable: true });
@@ -44,11 +46,14 @@ export async function startRabbitConsumer() {
 
     try {
       const payload = JSON.parse(msg.content.toString());
-      console.log('[Notifications] Sending notification:', payload);
+
+      // ✅ guardamos/emitimos
+      onMessage(payload);
+
+      console.log('[Notifications] Received:', payload);
       channel.ack(msg);
     } catch (e) {
-      console.error('[Notifications] Bad message, sending to reject:', e);
-      // si quieres requeue: true (pero ojo con loops)
+      console.error('[Notifications] Bad message:', e);
       channel.nack(msg, false, false);
     }
   });

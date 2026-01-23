@@ -29,6 +29,7 @@ export function Navbar() {
         <NavItem href="/files" label="Files" />
         <NavItem href="/tutors" label="Tutors" />
         <NavItem href="/staff" label="Staff" />
+        <NavItem href="/notifications" label="Notifications" />
       </div>
     </nav>
   );

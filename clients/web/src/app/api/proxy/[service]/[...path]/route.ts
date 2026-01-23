@@ -17,6 +17,8 @@ function baseUrl(service: string) {
       return config.tutorsBaseUrl;
     case "staff":
       return config.staffBaseUrl;
+    case "notifications":
+      return config.notificationsBaseUrl;
     default:
       return null;
   }
