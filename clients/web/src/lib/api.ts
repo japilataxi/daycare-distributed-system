@@ -90,6 +90,15 @@ export type CreateStaffDto = {
   role: string;
 };
 
+export type Notification = {
+  id: string;
+  message: string;
+  source: string;
+  childId: string;
+  createdAt: string;
+  raw?: any;
+};
+
 /* =======================
    API
 ======================= */
@@ -211,4 +220,9 @@ listStaff: () => request<any[]>(`/api/proxy/staff/staff`, { method: "GET" }),
       body: payload,
     }),
 
+//// NOTIFICATIONS ---------- //
+listNotifications: () =>
+    request<Notification[]>(`/api/proxy/notifications/notifications`, {
+      method: "GET",
+    }),
 };

@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { initKafkaProducer } from './kafka/kafka.producer'; // 👈 ajusta la ruta
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,6 +28,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
+
+  // 🔥 ESTA LÍNEA ES LA CLAVE
+  await initKafkaProducer();
 
   await app.listen(process.env.PORT || 3002);
 }

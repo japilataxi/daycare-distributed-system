@@ -6,7 +6,7 @@ let producer: Producer;
 export async function initKafkaProducer() {
   const kafka = new Kafka({
     clientId: 'attendance-service',
-    brokers: (process.env.KAFKA_BROKERS ?? 'kafka:29092').split(','),
+    brokers: (process.env.KAFKA_BROKERS ?? 'kafka:9092').split(','),
     retry: {
       retries: 10,
     },
