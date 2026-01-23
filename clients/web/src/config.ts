@@ -11,4 +11,5 @@ export const config = {
   filesBaseUrl: env("FILES_BASE_URL", "NEXT_PUBLIC_FILES_BASE_URL", "http://localhost:3008"),
   tutorsBaseUrl: env("TUTORS_BASE_URL", "NEXT_PUBLIC_TUTORS_BASE_URL", "http://localhost:3006"),
   staffBaseUrl: env("STAFF_BASE_URL", "NEXT_PUBLIC_STAFF_BASE_URL", "http://localhost:3007"),
+  notificationsBaseUrl: env("NOTIFICATIONS_BASE_URL", "NEXT_PUBLIC_NOTIFICATIONS_BASE_URL", "http://localhost:3004"),
 };
