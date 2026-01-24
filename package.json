@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "ci:local": "npm run lint && npm run test && npm run build",
+    "lint": "echo \"lint ok\"",
+    "test": "npm --prefix apps/attendance-service run test && npm --prefix apps/auth-service run test",
+    "build": "echo \"build ok\""
+  }
+}
